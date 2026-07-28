@@ -18,13 +18,13 @@ A sleek, modern glassmorphism UI library for Roblox. Designed for performance, e
 ## Example Script with All Features
 
 ```luau
-local NullLib = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ginzuss/nullui/refs/heads/main/NullUI.lua"))()
+local NullLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/ginzuss/nullui/refs/heads/main/NullUI.lua"))()
 
 local Window = NullLib:CreateWindow({
     Name = "NullUI",
     Title = "Null UI",
     Subtitle = "yomkamadeit",
-    BadgeText = "v5.3",
+    BadgeText = "v5.6",
     Icon = "https://i.postimg.cc/QxPqrLGq/image-Photoroom.png", -- u can change it
     WatermarkIcon = "https://i.postimg.cc/QxPqrLGq/image-Photoroom.png", -- u can change it too lol
     ShowHideButtonIcon = "https://i.postimg.cc/8CWY0LCY/raw-68251a78f0683b2ed02ae20e25f976ea.png", -- change by string if u want
@@ -84,6 +84,19 @@ LeftSection:AddButton({
             Icon = "check",
             Duration = 4,
             Color = NullLib.Theme.Good
+        })
+    end
+})
+
+LeftSection:AddButton({
+    Text = "Show Small Notification",
+    Icon = "bell",
+    Callback = function()
+        Window:Notify({
+            Content = "-56",
+            Color = NullLib.Theme.AccentSoft,
+            Duration = 3,
+            Type = "Small"
         })
     end
 })
