@@ -1,4 +1,4 @@
-local NullLib = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ginzuss/nullui/refs/heads/main/NullUI.lua"))()
+local NullLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/ginzuss/nullui/refs/heads/main/NullUI.lua"))()
 
 local Window = NullLib:CreateWindow({
     Name = "NullUI",
@@ -64,6 +64,19 @@ LeftSection:AddButton({
             Icon = "check",
             Duration = 4,
             Color = NullLib.Theme.Good
+        })
+    end
+})
+
+LeftSection:AddButton({
+    Text = "Show Small Notification",
+    Icon = "bell",
+    Callback = function()
+        Window:Notify({
+            Content = "-56",
+            Color = NullLib.Theme.AccentSoft,
+            Duration = 3,
+            Type = "Small"
         })
     end
 })
