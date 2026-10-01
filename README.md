@@ -1,4 +1,4 @@
-[![Null Ui](https://uibin.orqan.xyz/api/card?id=3874a0c2-b2b6-43be-9107-2f05cd3b1547&theme=orange)](https://uibin.orqan.xyz/library/3874a0c2-b2b6-43be-9107-2f05cd3b1547)
+[![Null Ui](https://uibin.orqan.xyz/api/card?id=3874a0c2-b2b6-43be-9107-2f05cd3b1547&theme=black)](https://uibin.orqan.xyz/library/3874a0c2-b2b6-43be-9107-2f05cd3b1547)
 # Null UI
 ### Mabe by Yomka
 
