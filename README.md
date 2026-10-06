@@ -1,51 +1,106 @@
 [![Null Ui](https://uibin.orqan.xyz/api/card?id=3874a0c2-b2b6-43be-9107-2f05cd3b1547&theme=black)](https://uibin.orqan.xyz/library/3874a0c2-b2b6-43be-9107-2f05cd3b1547)
 # Null UI
-### Mabe by Yomka
-
+### Made by Yomka
 
 A sleek, modern glassmorphism UI library for Roblox. Designed for performance, ease of use, and full customization.
 
 ## Key Features
+
 * **Glassmorphism Design:** Translucent surfaces with blur-like effects.
 * **Theme System:** 20+ built-in presets (Arctic, Sunset, Midnight, Ocean, RoseGold, Terminal, etc.) and custom theme registration.
-* **Lucide Icons:** Integrated support for `Icon = "house" -- just type icon name here`.
-* **Custom UI Backgrounds:** Set/clear background image via URL, Roblox ID, or `rbxassetid://...`.
-* **Config System:** Built-in Save/Load functionality with JSON and Autoload support.
-* **Adaptive Layouts:** Move tabs to Top, Bottom, Left, or Right dynamically.
-* **Mobile Ready:** Responsive scaling, draggable show/hide button, and touch-friendly controls.
+* **Lucide Icons:** Integrated support for `Icon = "house"` - just type the icon name.
+* **Custom UI Backgrounds:** Set/clear a background image via URL, Roblox ID, or `rbxassetid://...`.
+* **Config System:** Built-in Save/Load with JSON, plus autoload support.
+* **Adaptive Layouts:** Move tabs to Top, Bottom, Left, or Right at runtime.
+* **Mobile Ready:** Responsive scaling, draggable show/hide button, touch-friendly controls.
+* **Non-blocking:** the window shows instantly, assets stream in behind it.
 
 ---
 
-## Example Script with All Features
+## Quick start
 
 ```luau
 local NullLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/ginzuss/nullui/refs/heads/main/NullUI.lua"))()
 
 local Window = NullLib:CreateWindow({
+    Title = "Null UI",
+    Subtitle = "yomkamadeit",
+    BadgeText = "v5.7",
+    ToggleKey = Enum.KeyCode.B,
+    ConfigFolder = "NullUI"
+})
+
+local Tab = Window:CreateTab({Name = "Main", Icon = "house", Description = "Some main things"})
+local Section = Tab:CreateSection({Title = "Mazafaka", Icon = "sparkles", Side = "Left"})
+
+Section:AddToggle({
+    Text = "Enable ESP",
+    Description = "example toggle for visual color",
+    Flag = "EnableESP",
+    Default = true,
+    Callback = function(state)
+        print("ESP:", state)
+    end
+})
+
+Window:Notify({Title = "Hello", Content = "You unfolded me!", Icon = "bell", Color = NullLib.Theme.Good})
+```
+
+---
+
+## Full example (all features)
+
+```luau
+local NullLib = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ginzuss/nullui/refs/heads/main/NullUI.lua"))()
+
+local Window = NullLib:CreateWindow({
     Name = "NullUI",
     Title = "Null UI",
     Subtitle = "yomkamadeit",
-    BadgeText = "v5.6",
+    BadgeText = "v5.7",
     Icon = "https://i.postimg.cc/QxPqrLGq/image-Photoroom.png", -- u can change it
     WatermarkIcon = "https://i.postimg.cc/QxPqrLGq/image-Photoroom.png", -- u can change it too lol
     ShowHideButtonIcon = "https://i.postimg.cc/8CWY0LCY/raw-68251a78f0683b2ed02ae20e25f976ea.png", -- change by string if u want
     ShowHideButtonSize = 38, -- optional
+    -- Scale = 0.95, -- optional: global UI scale (library default: 1 on PC, 0.94 on phone)
+    -- Loading = true, -- optional: show the animated loading screen (default true)
+    -- LoadingDelay = 0.55, -- optional: how long the loader stays before the reveal
+    -- IntroDuration = 0.75, -- optional: length of the reveal tween (no overlay, just the window animating in)
+    -- AutoloadDelay = 0.7, -- optional: wait before the autoloaded config is applied (needs to be after themes are registered)
     ToggleKey = Enum.KeyCode.B,
     ConfigFolder = "NullUI",
     ConfigName = "ExampleConfig",
     TabPosition = "Bottom",
     ShowTabTitle = true,
-    WelcomeNotification = true
+    WelcomeNotification = true,
+    UIWatermark = true
 })
 
 
 local RS = game:GetService("RunService")
 local Player = game:GetService("Players").LocalPlayer
-local fps = 60
+
+local elapsed = 0
+local frames = 0
+local updateInterval = 0.5
+
 RS.RenderStepped:Connect(function(deltaTime)
-    fps = math.floor(1 / deltaTime)
-    -- You can change the text, or you can use text + a new image: Window:SetWatermark("text", "link")
-    Window:SetWatermark(string.format("YomkaWasHere | User: %s | FPS: %d", Player.Name, fps))
+    elapsed += deltaTime
+    frames += 1
+
+    if elapsed >= updateInterval then
+        local fps = math.floor(frames / elapsed)
+
+        -- You can change the text, or you can use text + a new image: Window:SetWatermark("text", "link")
+        Window:SetWatermark(string.format(
+            "YomkaWasHere | User: %s | FPS: %d",
+            Player.Name,
+            fps
+        ))
+
+        elapsed = 0
+        frames = 0
+    end
 end)
 
 local MainTab = Window:CreateTab({
@@ -77,7 +132,7 @@ LeftSection:AddParagraph("Test text yomkayomkayomkayomka")
 
 LeftSection:AddButton({
     Text = "Show Notification",
-    Icon = "check-circle",
+    Icon = "circle-check",
     Callback = function()
         Window:Notify({
             Title = "Success!",
@@ -85,19 +140,6 @@ LeftSection:AddButton({
             Icon = "check",
             Duration = 4,
             Color = NullLib.Theme.Good
-        })
-    end
-})
-
-LeftSection:AddButton({
-    Text = "Show Small Notification",
-    Icon = "bell",
-    Callback = function()
-        Window:Notify({
-            Content = "-56",
-            Color = NullLib.Theme.AccentSoft,
-            Duration = 3,
-            Type = "Small"
         })
     end
 })
@@ -479,47 +521,283 @@ ConfigSection:AddKeybind({
     end
 })
 
+local InterfaceSection = ConfigTab:CreateSection({
+    Title = "Interface Scale",
+    Description = "Resize the whole UI live",
+    Icon = "maximize-2",
+    Side = "Right"
+})
+
+InterfaceSection:AddSlider({
+    Text = "UI Scale",
+    Flag = "UIScaleValue",
+    Decimals = 2,
+    Min = 0.70, -- the library clamps the scale to 0.70 .. 1.30
+    Max = 1.30,
+    Default = Window:GetScale(),
+    Callback = function(value)
+        Window:SetScale(value) -- Window:GetScale() / Window:ResetScale() also exist
+    end
+})
+
+InterfaceSection:AddButton({
+    Text = "Reset Scale",
+    Icon = "rotate-ccw",
+    Callback = function()
+        Window:ResetScale()
+        Window:Notify({
+            Title = "Interface",
+            Content = string.format("Scale reset to %d%%", math.floor(Window:GetScale() * 100 + 0.5)),
+            Icon = "check",
+            Color = NullLib.Theme.AccentSoft
+        })
+    end
+})
+
+local NotifySection = ConfigTab:CreateSection({
+    Title = "Notifications",
+    Description = "buttons and positions",
+    Icon = "bell",
+    Side = "Left"
+})
+
+NotifySection:AddButton({
+    Text = "Ask (Yes / No)",
+    Icon = "circle-question-mark",
+    Callback = function()
+        Window:Notify({
+            Title = "Delete config?",
+            Content = "This cannot be undone after.",
+            Icon = "triangle-alert",
+            Color = NullLib.Theme.Bad,
+            Buttons = {
+                -- max two buttons; the first one is the accent coloured primary
+                { Text = "Delete", Callback = function() print("config deleted") end },
+                { Text = "Cancel", Callback = function() print("cancelled") end }
+            }
+        })
+    end
+})
+
+
+local CollapsibleExample = ConfigTab:CreateSection({
+    Title = "Collapsible Section",
+    Description = "click the header or the arrow",
+    Icon = "chevron-down",
+    Side = "Right",
+    Collapsible = true, -- sections are NOT collapsible unless you ask for it
+    Collapsed = true -- optional: starts folded
+})
+
+CollapsibleExample:AddParagraph("Folded by default", "Click the section header, the title or the arrow to fold and unfold it.")
+
+CollapsibleExample:AddButton({
+    Text = "Unfolded content",
+    Icon = "eye",
+    Callback = function()
+        Window:Notify({ Title = "Hello", Content = "You unfolded me!", Color = NullLib.Theme.Good })
+    end
+})
+
 refreshAutoloadStatus()
 ```
 
 ---
 
-## Components
+## CreateWindow options
 
-### Window Methods
-* `Window:Toggle(bool)` - Show/Hide the UI.
-* `Window:SetThemeByName(string)` - Change theme on the fly.
-* `Window:SetBackground(source, options?)` - Set custom UI background (`source` can be URL, number ID, or `rbxassetid://...`).  
-  `options.Transparency` and `options.ScaleType` are optional.
-* `Window:GetBackground()` - Get current background settings table (`Source`, `Transparency`, `ScaleType`).
-* `Window:Notify(options)` - Push a notification.
-* `Window:SaveConfig(name)` - Save current flags to a file.
-* `Window:LoadConfig(name)` - Load settings from a file.
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `Name` | string | `"NullUI"` | Internal name of the ScreenGui. |
+| `Title` / `Subtitle` | string | `"Null UI"` / `""` | Header text. |
+| `BadgeText` | string | `nil` | Small badge next to the title. |
+| `Icon` | string | `nil` | Header icon (lucide name, URL, `rbxassetid://...`). |
+| `WatermarkIcon` | string | `nil` | Icon used by the watermark text. |
+| `ShowHideButtonIcon` / `ShowHideButtonSize` | string / number | - / 52 | Floating show/hide button (mobile). |
+| `ToggleKey` | Enum.KeyCode | `RightShift` | Key that shows/hides the UI. |
+| `ConfigFolder` / `ConfigName` | string | `"NullUI"` / `"Default"` | Where configs are stored. |
+| `TabPosition` | string | `"Left"` | `"Left"`, `"Right"`, `"Top"`, `"Bottom"`. |
+| `ShowTabTitle` | boolean | `true` | Show the tab title in the content header. |
+| `WelcomeNotification` | boolean | `true` | Show the "UI launched" notification. |
+| `Size` | UDim2 | `840x520` | Window size. |
+| `Position` | UDim2 | centered | Window position. |
+| `Loading` | boolean | `true` | `false` = no loading pause and no reveal tween. |
+| `LoadingDelay` | number | `0.25` | Seconds the window stays hidden before revealing. |
+| `IntroDuration` | number | `0.75` | Length of the reveal tween. |
+| `AutoloadDelay` | number | `0.7` | Seconds to wait before applying an autoloaded config. |
 
-### Background Quick Use
-```lua
-Window:SetBackground("image url") -- one arg supported
-Window:SetBackground("1234567890") -- Roblox asset id also supported
-Window:SetBackground("", true) -- clear background silently
+---
+
+## Loading / reveal
+
+```luau
+-- default behaviour
+CreateWindow({Loading = true, LoadingDelay = 0.25, IntroDuration = 0.75})
+
+-- no pause at all
+CreateWindow({Loading = false})
+
+-- or finish it yourself whenever you are ready
+Window:FinishLoading()        -- animated reveal
+Window:FinishLoading(true)    -- instant
 ```
 
-### Section Elements
-* **Label / Paragraph:** Simple text display.
-* **Button:** Standard clickable action.
-* **Toggle:** Boolean switch (saves to flag).
-* **Slider:** Supports integer and decimal mode. Use `Decimals = true` with decimal `Min` / `Max` / `Default` values like `0.10`.
-* **Textbox:** String input also support multi select. Use `MultiSelect = true`.
-* **Dropdown:** Selectable list of options.
-* **ColorPicker:** Full RGBA support (saves as table/Hex).
-* **Image:** Displays local assets, rbxassetids, or URLs.
-* **KeyBind:** U can change key for anything.
+---
+
+## UI scale and resizing
+
+```luau
+Window:SetScale(0.8)   -- clamped to 0.70 .. 1.30
+Window:GetScale()
+Window:ResetScale()
+```
+
+The scale is hard-limited to **0.70 - 1.30**, and the window also keeps a minimum *on-screen* size (460x360 desktop / 236x228 phone). A small scale plus the corner grip can therefore never shrink the UI into an unreadable state. The built-in settings menu (sliders icon) has the same slider under **Interface -> UI Scale**.
+
+To resize, drag the small arc that curls around the bottom-right corner of the window - it grows and lights up on hover.
+
+---
+
+## Notifications
+
+```luau
+-- position: 9 presets
+NullLib:SetNotificationPosition("TopRight")
+-- TopLeft / TopCenter / TopRight / MiddleLeft / MiddleCenter / MiddleRight / BottomLeft / BottomCenter / BottomRight
+-- or explicit:
+NullLib:SetNotificationPosition("Top", "Right")
+NullLib:GetNotificationPosition()  --> e.g. "TopRight"
+NullLib:GetNotificationAnchor()    --> "Top", "Right"
+
+Window:Notify({
+    Title = "Saved",
+    Content = "Config written to disk.",
+    Icon = "check",                  -- lucide name / URL
+    Color = NullLib.Theme.Good,
+    Duration = 5,
+    Type = "Normal",                 -- "Normal" or "Small"
+
+    -- action buttons (optional, max 2)
+    Buttons = {
+        {Text = "Delete", Callback = function() end},
+        {Text = "Cancel", Callback = function() end}
+    }
+})
+```
+
+Button layout: two buttons split the card width exactly in half, one button spans the full width. The notification position can also be changed from the settings menu (**Notifications -> Position**).
+
+---
+
+## Sections
+
+```luau
+local Section = Tab:CreateSection({
+    Title = "Combat",
+    Description = "optional subtitle",
+    Icon = "swords",       -- optional
+    Side = "Left",         -- "Left" or "Right" column
+    Collapsible = true     -- optional, off by default
+})
+
+Section:SetCollapsed(true)
+Section:ToggleCollapsed()
+Section:IsCollapsed()
+Section:SetTitle("New title")
+```
+
+`Collapsible = true` turns the section header into a collapse/expand control (chevron in the header). Sections without it behave exactly as before.
 
 ---
 
 ## Themes
+
+```luau
+NullLib:ListThemes()                              -- array of names
+NullLib:HasTheme("Yoxi")                          -- true if registered
+NullLib:GetTheme("Yoxi")                          -- theme table
+NullLib:RegisterTheme("MyTheme", {Accent = ..., Background = ..., Text = ..., ...})
+Window:SetThemeByName("MyTheme")
+```
+
 Available presets: `Null`, `Arctic`, `Ember`, `Forest`, `Sunset`, `Midnight`, `Mint`, `Snow`, `Blackout`, `Yoxi`, `Yoxi Blue`, `RoseGold`, `Ocean`, `Lavender`, `Cyber`, `Cherry`, `Matcha`, `Coral`, `Sapphire`, `Terminal`.
+
+**Autoload + custom themes:** register your themes before or after `CreateWindow` - both work now. If an autoloaded config mentions a theme that is not registered yet, Null UI queues it and applies it the moment `RegisterTheme` adds it. `AutoloadDelay` (default `0.7` s) keeps autoload from firing while your script is still building the UI.
 
 ---
 
-## Icon Support
-Use `icon-name` for any icon parameter. You can find icon names at [lucide.dev](https://lucide.dev/icons/). Example: `"shield"`, `"user"`.
+## Window methods
+
+| Method | Description |
+| --- | --- |
+| `Window:Toggle(bool)` | Show/hide the UI. |
+| `Window:FinishLoading(instant?)` | Finish the loading state manually. |
+| `Window:SetScale(n)` / `GetScale()` / `ResetScale()` | UI scale (0.70 - 1.30). |
+| `Window:CreateTab(options)` / `SelectTab(...)` | Tabs. |
+| `Window:SetTabPosition(mode)` | `"Left"`, `"Right"`, `"Top"`, `"Bottom"` at runtime. |
+| `Window:SetThemeByName(name)` / `SetTheme(theme)` | Change theme on the fly. |
+| `Window:SetBackground(source, options?)` | URL / ID / `rbxassetid://...`; `options.Transparency`, `options.ScaleType`. |
+| `Window:GetBackground()` | `{Source, Transparency, ScaleType}`. |
+| `Window:Notify(options)` | Push a notification. |
+| `Window:SetWatermark(text, image?)` / `SetWatermarkVisible(bool)` | Watermark. |
+| `Window:SetTitle(text)` / `SetSubtitle(text)` | Change header text. |
+| `Window:SaveConfig(name)` / `LoadConfig(name)` | Config files. |
+| `Window:ListConfigs()` / `RefreshConfigs()` | Config list. |
+| `Window:DeleteConfig(name)` | Delete a config. |
+| `Window:SetAutoloadConfig(name, enabled)` / `GetAutoloadState()` / `DisableAutoload()` | Autoload. |
+| `Window:SetConfigVal(flag, value)` / `GetConfigVal(flag)` | Read/write flags directly. |
+| `Window:Destroy()` | Remove the UI. |
+
+### Background quick use
+
+```lua
+Window:SetBackground("image url")   -- one arg is fine
+Window:SetBackground("1234567890")  -- Roblox asset id
+Window:SetBackground("", true)      -- clear silently
+```
+
+---
+
+## Section elements
+
+| Element | Notes |
+| --- | --- |
+| `AddLabel(text)` / `AddParagraph(text)` | Static text. |
+| `AddButton{Text, Icon, Callback}` | Clickable action. |
+| `AddToggle{Text, Description, Flag, Default, Callback}` | Boolean switch. |
+| `AddSlider{Text, Flag, Min, Max, Default, Decimals, Callback}` | `Decimals = true` for float values. |
+| `AddTextbox{Placeholder, Flag, Default, Callback}` | String input. |
+| `AddDropdown{Text, Flag, Values, Default, MultiSelect, Callback}` | `MultiSelect = true` for multi choice. |
+| `AddColorPicker{Text, Flag, DefaultColor, DefaultAlpha, Callback}` | RGBA, saves as table/hex. |
+| `AddImage{Image, Height, ScaleType, Caption}` | Local asset, rbxassetid or URL. |
+| `AddKeybind{Text, Flag, DefaultKey, Mode, Callback, OnKeyChanged}` | Rebindable key. |
+
+Controller methods returned by the elements:
+
+```luau
+toggle:Set(true, true)      -- value, skipCallback
+toggle:Get()
+slider:Set(0.5, true)
+dropdown:Set("Closest", true)
+dropdown:SetValues(newValues, keepSelection)
+dropdown:ToggleValue(value) / Clear() / SelectAll()
+textbox:Set("text", true) / GetText()
+keybind:SetKey(Enum.KeyCode.F) / Trigger()
+colorpicker:Set(color, alpha) / GetColor()
+controller:Serialize() / Deserialize(data)
+```
+
+---
+
+## Icon support
+
+Use `icon-name` for any icon parameter - names come from [lucide.dev](https://lucide.dev/icons/). Example: `"shield"`, `"user"`, `"wand-sparkles"`, `"person-standing"`.
+
+Icons and images are resolved **in the background**: the window never waits for them, and each icon appears as soon as it is available (there is a small built-in retry for slow loads).
+
+---
+
+## Troubleshooting
+
+* **Icons show as text** ("house", "sparkles") - the icon table failed to download; it retries automatically, and any icon name passed as a plain string is treated as a lucide name.
+* **Custom theme missing after autoload** - register your themes as early as possible and leave `AutoloadDelay` at its default so the config loads after your script registers them.
