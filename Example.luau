@@ -1,30 +1,53 @@
-local NullLib = loadstring(game:HttpGet("https://raw.githubusercontent.com/ginzuss/nullui/refs/heads/main/NullUI.lua"))()
+local NullLib = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ginzuss/nullui/refs/heads/main/NullUI.lua"))()
 
 local Window = NullLib:CreateWindow({
     Name = "NullUI",
     Title = "Null UI",
     Subtitle = "yomkamadeit",
-    BadgeText = "v5.6",
+    BadgeText = "v5.7",
     Icon = "https://i.postimg.cc/QxPqrLGq/image-Photoroom.png", -- u can change it
     WatermarkIcon = "https://i.postimg.cc/QxPqrLGq/image-Photoroom.png", -- u can change it too lol
     ShowHideButtonIcon = "https://i.postimg.cc/8CWY0LCY/raw-68251a78f0683b2ed02ae20e25f976ea.png", -- change by string if u want
     ShowHideButtonSize = 38, -- optional
+    -- Scale = 0.95, -- optional: global UI scale (library default: 1 on PC, 0.94 on phone)
+    -- Loading = true, -- optional: show the animated loading screen (default true)
+    -- LoadingDelay = 0.55, -- optional: how long the loader stays before the reveal
+    -- IntroDuration = 0.75, -- optional: length of the reveal tween (no overlay, just the window animating in)
+    -- AutoloadDelay = 0.7, -- optional: wait before the autoloaded config is applied (needs to be after themes are registered)
     ToggleKey = Enum.KeyCode.B,
     ConfigFolder = "NullUI",
     ConfigName = "ExampleConfig",
     TabPosition = "Bottom",
     ShowTabTitle = true,
-    WelcomeNotification = true
+    WelcomeNotification = true,
+    UIWatermark = true
 })
 
 
 local RS = game:GetService("RunService")
 local Player = game:GetService("Players").LocalPlayer
-local fps = 60
+
+local elapsed = 0
+local frames = 0
+local updateInterval = 0.5
+
 RS.RenderStepped:Connect(function(deltaTime)
-    fps = math.floor(1 / deltaTime)
-    -- You can change the text, or you can use text + a new image: Window:SetWatermark("text", "link")
-    Window:SetWatermark(string.format("YomkaWasHere | User: %s | FPS: %d", Player.Name, fps))
+    elapsed += deltaTime
+    frames += 1
+
+    if elapsed >= updateInterval then
+        local fps = math.floor(frames / elapsed)
+
+        -- You can change the text, or you can use text + a new image: Window:SetWatermark("text", "link")
+        Window:SetWatermark(string.format(
+            "YomkaWasHere | User: %s | FPS: %d",
+            Player.Name,
+            fps
+        ))
+
+        elapsed = 0
+        frames = 0
+    end
 end)
 
 local MainTab = Window:CreateTab({
@@ -56,7 +79,7 @@ LeftSection:AddParagraph("Test text yomkayomkayomkayomka")
 
 LeftSection:AddButton({
     Text = "Show Notification",
-    Icon = "check-circle",
+    Icon = "circle-check",
     Callback = function()
         Window:Notify({
             Title = "Success!",
@@ -64,19 +87,6 @@ LeftSection:AddButton({
             Icon = "check",
             Duration = 4,
             Color = NullLib.Theme.Good
-        })
-    end
-})
-
-LeftSection:AddButton({
-    Text = "Show Small Notification",
-    Icon = "bell",
-    Callback = function()
-        Window:Notify({
-            Content = "-56",
-            Color = NullLib.Theme.AccentSoft,
-            Duration = 3,
-            Type = "Small"
         })
     end
 })
@@ -455,6 +465,84 @@ ConfigSection:AddKeybind({
         if bindKey and bindKey ~= Enum.KeyCode.Unknown then
             Window.ToggleKey = bindKey
         end
+    end
+})
+
+local InterfaceSection = ConfigTab:CreateSection({
+    Title = "Interface Scale",
+    Description = "Resize the whole UI live",
+    Icon = "maximize-2",
+    Side = "Right"
+})
+
+InterfaceSection:AddSlider({
+    Text = "UI Scale",
+    Flag = "UIScaleValue",
+    Decimals = 2,
+    Min = 0.70, -- the library clamps the scale to 0.70 .. 1.30
+    Max = 1.30,
+    Default = Window:GetScale(),
+    Callback = function(value)
+        Window:SetScale(value) -- Window:GetScale() / Window:ResetScale() also exist
+    end
+})
+
+InterfaceSection:AddButton({
+    Text = "Reset Scale",
+    Icon = "rotate-ccw",
+    Callback = function()
+        Window:ResetScale()
+        Window:Notify({
+            Title = "Interface",
+            Content = string.format("Scale reset to %d%%", math.floor(Window:GetScale() * 100 + 0.5)),
+            Icon = "check",
+            Color = NullLib.Theme.AccentSoft
+        })
+    end
+})
+
+local NotifySection = ConfigTab:CreateSection({
+    Title = "Notifications",
+    Description = "buttons and positions",
+    Icon = "bell",
+    Side = "Left"
+})
+
+NotifySection:AddButton({
+    Text = "Ask (Yes / No)",
+    Icon = "circle-question-mark",
+    Callback = function()
+        Window:Notify({
+            Title = "Delete config?",
+            Content = "This cannot be undone after.",
+            Icon = "triangle-alert",
+            Color = NullLib.Theme.Bad,
+            Buttons = {
+                -- max two buttons; the first one is the accent coloured primary
+                { Text = "Delete", Callback = function() print("config deleted") end },
+                { Text = "Cancel", Callback = function() print("cancelled") end }
+            }
+        })
+    end
+})
+
+
+local CollapsibleExample = ConfigTab:CreateSection({
+    Title = "Collapsible Section",
+    Description = "click the header or the arrow",
+    Icon = "chevron-down",
+    Side = "Right",
+    Collapsible = true, -- sections are NOT collapsible unless you ask for it
+    Collapsed = true -- optional: starts folded
+})
+
+CollapsibleExample:AddParagraph("Folded by default", "Click the section header, the title or the arrow to fold and unfold it.")
+
+CollapsibleExample:AddButton({
+    Text = "Unfolded content",
+    Icon = "eye",
+    Callback = function()
+        Window:Notify({ Title = "Hello", Content = "You unfolded me!", Color = NullLib.Theme.Good })
     end
 })
 
